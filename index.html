@@ -11,14 +11,13 @@
   <link rel="icon" href="./static/images/icon/icon1.png">
 
   <style>
-    /* ====== Layout: Query / Targets ====== */
     .query-block {
       display: flex;
       flex-direction: column;
       gap: 0;
       margin-bottom: 3rem;
       padding-bottom: 2rem;
-      border-bottom: 2px solid #ddd;  /* ✅ 구분선 추가 */
+      border-bottom: 2px solid #ddd;
     }
 
     .query-video { flex: 0 0 300px; }
@@ -29,7 +28,6 @@
       font-size: 1.05rem;
       line-height: 1.5;
     }
-    /* 타겟 비디오 나열을 그리드로 보기 좋게 */
     .target-videos {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -37,34 +35,28 @@
       margin-top: 1rem;
     }
     .target-wrapper {
-      width: 100%;                /* 자동 너비 */
-      max-width: 320px;           /* 너무 커지지 않게 제한 */
+      width: 100%;
+      max-width: 320px;
       margin: 0 auto;}
     .target-wrapper video { width: 100%; border: 3px solid #ccc; }
     .target-wrapper video.target { border: 3px solid #2ecc71; }
     .target-caption { margin-top: 0.4rem; font-size: 0.9rem; }
     .query-caption { font-size: 0.9rem; margin-top: 0.5rem; text-align: center; }
 
-    /* ====== Title hierarchy ====== */
-    /* Main page title uses Bulma .title.is-1 (가장 큼) */
-
-    /* Section titles like "Datasets" (STATISTICS보다 큼) */
     .section-title {
       text-align: center;
-      font-size: 2.8rem; /* ▲ 더 키움 */
+      font-size: 2.8rem;
       font-weight: 800;
       margin-bottom: 1.25rem;
     }
 
-    /* Sub-section title like "STATISTICS" (section-title보다 약간 작게) */
     .stats-title {
       text-align: center;
-      font-size: 2.5rem; /* ▲ 더 키움 */
+      font-size: 2.5rem;
       font-weight: 800;
       margin: 3rem 0 1.25rem 0;
     }
 
-    /* Figure titles (표 제목들: 모두 같은 크기 + 검정) */
     .fig-title {
       color: #111;
       font-size: 1.1rem;
@@ -72,18 +64,14 @@
       text-align: center;
       margin-bottom: 0.75rem;
     }
-
-    /* Keep old blue subtitle for legacy if needed (unused for figures now)
-       EXAMPLES OF GENERATED AV-COMP TRIPLETS → 지금 DATASETS 글자 크기(기존 2.25rem) */
     .subtitle-blue {
       color: #1d70b8;
-      font-size: 1.85rem; /* ▲ EXAMPLES를 DATASETS(예전 크기) 수준으로 키움 */
+      font-size: 1.85rem;
       font-weight: 700;
       text-align: center;
       margin-bottom: 1rem;
     }
 
-    /* Teaser */
     .teaser img { max-width: 60%; }
     .teaser-caption {
       max-width: 800px;
@@ -93,45 +81,40 @@
       text-align: center;
     }
 
-    /* Abstract box */
     .abstract-box {
       background-color: #deeefd;
       padding: 2rem;
       border-radius: 10px;
     }
     .abstract-box h2 {
-      text-align: center;           /* ▲ Abstract 제목 가운데 정렬 */
-      font-size: 2.6rem;            /* ▲ Abstract 제목 더 키움 */
+      text-align: center;
+      font-size: 2.6rem;
       margin-bottom: 0.75rem;
     }
     .abstract-box .content {
-      text-align: center;           /* ▲ 본문 가운데 정렬 */
+      text-align: center;
     }
     .abstract-box p { font-size: 1.05rem; }
 
-    /* fieldset */
     fieldset { border: 2px solid #999; border-radius: 6px; padding: 1rem; }
     legend { font-weight: bold; padding: 0 10px; }
 
-    /* spacing under the subtitle under H1 */
     .subtitle.is-5 { margin-top: 1rem; }
 
-    /* ====== Image sizing helpers ====== */
     .img-max-600 { max-width: 600px; width: 100%; height: auto; margin: 0 auto; }
-    .img-large { max-width: 720px; width: 100%; height: auto; margin: 0 auto; } /* 워드클라우드 크게 */
-    .img-cluster { max-width: 1080px; width: 100%; height: auto; margin: 0 auto; } /* 워드클라우드 크게 */
+    .img-large { max-width: 720px; width: 100%; height: auto; margin: 0 auto; }
+    .img-cluster { max-width: 1080px; width: 100%; height: auto; margin: 0 auto; }
     .figure { display: flex; flex-direction: column; align-items: center; }
 
-    /* ====== Horizontal scroll row for three stats figures ====== */
     .fig-row-scroll {
       display: flex;
       gap: 1.5rem;
-      overflow-x: auto;          /* ▲ 가로 스크롤 가능 */
+      overflow-x: auto;
       padding-bottom: 0.5rem;
     }
     .fig-card {
-      flex: 0 0 auto;            /* 가로로 이어붙이기 */
-      width: 600px;              /* 각 아이템 너비 고정 (이미지 max-600과 맞춤) */
+      flex: 0 0 auto;
+      width: 600px;
     }
   </style>
 </head>
