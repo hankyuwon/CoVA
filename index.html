@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COVA: Text-Guided Composed Retrieval for Audio-Visual Content</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/icon/icon1.png">
+
+  <style>
+    /* ====== Layout: Query / Targets ====== */
+    .query-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid #ddd;  /* ✅ 구분선 추가 */
+    }
+
+    .query-video { flex: 0 0 300px; }
+    .query-video video { width: 100%; }
+    .modification-text {
+      width:100%;
+      height:100%;
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+    /* 타겟 비디오 나열을 그리드로 보기 좋게 */
+    .target-videos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .target-wrapper {
+      width: 100%;                /* 자동 너비 */
+      max-width: 320px;           /* 너무 커지지 않게 제한 */
+      margin: 0 auto;}
+    .target-wrapper video { width: 100%; border: 3px solid #ccc; }
+    .target-wrapper video.target { border: 3px solid #2ecc71; }
+    .target-caption { margin-top: 0.4rem; font-size: 0.9rem; }
+    .query-caption { font-size: 0.9rem; margin-top: 0.5rem; text-align: center; }
+
+    /* ====== Title hierarchy ====== */
+    /* Main page title uses Bulma .title.is-1 (가장 큼) */
+
+    /* Section titles like "Datasets" (STATISTICS보다 큼) */
+    .section-title {
+      text-align: center;
+      font-size: 2.8rem; /* ▲ 더 키움 */
+      font-weight: 800;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Sub-section title like "STATISTICS" (section-title보다 약간 작게) */
+    .stats-title {
+      text-align: center;
+      font-size: 2.5rem; /* ▲ 더 키움 */
+      font-weight: 800;
+      margin: 3rem 0 1.25rem 0;
+    }
+
+    /* Figure titles (표 제목들: 모두 같은 크기 + 검정) */
+    .fig-title {
+      color: #111;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Keep old blue subtitle for legacy if needed (unused for figures now)
+       EXAMPLES OF GENERATED AV-COMP TRIPLETS → 지금 DATASETS 글자 크기(기존 2.25rem) */
+    .subtitle-blue {
+      color: #1d70b8;
+      font-size: 1.85rem; /* ▲ EXAMPLES를 DATASETS(예전 크기) 수준으로 키움 */
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    /* Teaser */
+    .teaser img { max-width: 60%; }
+    .teaser-caption {
+      max-width: 800px;
+      margin: 1rem auto 0;
+      font-size: 0.95rem;
+      color: #555;
+      text-align: center;
+    }
+
+    /* Abstract box */
+    .abstract-box {
+      background-color: #deeefd;
+      padding: 2rem;
+      border-radius: 10px;
+    }
+    .abstract-box h2 {
+      text-align: center;           /* ▲ Abstract 제목 가운데 정렬 */
+      font-size: 2.6rem;            /* ▲ Abstract 제목 더 키움 */
+      margin-bottom: 0.75rem;
+    }
+    .abstract-box .content {
+      text-align: center;           /* ▲ 본문 가운데 정렬 */
+    }
+    .abstract-box p { font-size: 1.05rem; }
+
+    /* fieldset */
+    fieldset { border: 2px solid #999; border-radius: 6px; padding: 1rem; }
+    legend { font-weight: bold; padding: 0 10px; }
+
+    /* spacing under the subtitle under H1 */
+    .subtitle.is-5 { margin-top: 1rem; }
+
+    /* ====== Image sizing helpers ====== */
+    .img-max-600 { max-width: 600px; width: 100%; height: auto; margin: 0 auto; }
+    .img-large { max-width: 720px; width: 100%; height: auto; margin: 0 auto; } /* 워드클라우드 크게 */
+    .img-cluster { max-width: 1080px; width: 100%; height: auto; margin: 0 auto; } /* 워드클라우드 크게 */
+    .figure { display: flex; flex-direction: column; align-items: center; }
+
+    /* ====== Horizontal scroll row for three stats figures ====== */
+    .fig-row-scroll {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;          /* ▲ 가로 스크롤 가능 */
+      padding-bottom: 0.5rem;
+    }
+    .fig-card {
+      flex: 0 0 auto;            /* 가로로 이어붙이기 */
+      width: 600px;              /* 각 아이템 너비 고정 (이미지 max-600과 맞춤) */
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">COVA: Text-Guided Composed Retrieval for Audio-Visual Content</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              Gyuwon Han<sup>1</sup>,</span>
+            <span class="author-block">
+              Young Kyun Jang<sup>2</sup>,</span>
+            <span class="author-block">
+              Chanho Eom<sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Chung-Ang University</span>
+            <span class="author-block"><sup>2</sup>Google DeepMind</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Teaser Image -->
+<section class="section teaser">
+  <div class="container has-text-centered">
+    <img src="./static/images/teaser.png" alt="Teaser Image">
+    <p class="teaser-caption">
+      Comparison between (a) existing CoVR, which only accounts for visual modifications, and (b) our proposed
+      COVA benchmark, which jointly considers both visual and auditory modifications for more realistic retrieval scenarios.
+    </p>
+  </div>
+</section>
+
+<!-- Abstract -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="abstract-box">
+      <h2 class="title is-3">Abstract</h2>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="content">
+            <p>
+              Composed Video Retrieval (CoVR) aims to retrieve a target video from a large gallery using a reference video and a textual query specifying visual modifications. However, existing benchmarks consider only visual changes, ignoring videos that differ in audio despite visual similarity. To address this limitation, we introduce Composed retrieval for Video with its Audio (COVA), a new retrieval task that accounts for both visual and auditory variations. To support this, we construct AV-Comp, a benchmark of video pairs with cross-modal changes and textual queries describing the differences, enabling retrieval based on audio as well. We also propose AVT Compositional Fusion (AVT), which integrates video, audio, and text features by selectively aligning the query to the most relevant modality. AVT outperforms traditional unimodal fusion and serves as a strong baseline for COVA.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Datasets -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Datasets</h2>
+
+    <h3 class="subtitle-blue" style="margin-top: 2rem;">EXAMPLES OF GENERATED AV-COMP TRIPLETS</h3>
+
+    <!-- ===== Group 1 ===== -->
+    <div class="query-block">
+      <!-- Query Video -->
+      <div class="query-video">
+        <video autoplay muted loop playsinline controls>
+          <source src="./static/videos/1/00_query_U6ElTfA5lSw_10.mp4" type="video/mp4">
+        </video>
+        <div class="query-caption"><strong>Query:</strong> U6ElTfA5lSw_10</div>
+      </div>
+
+      <!-- Modification Text -->
+      <div class="modification-text">
+        <fieldset>
+          <legend>Modification Text</legend>
+          <strong>Object:</strong> Replace the transparent plastic container with a black metal cage containing various colorful toys and perches.<br><br>
+          <strong>Action:</strong> Change the parrot's action from perching on a container to climbing out of the cage onto the top bar and observing its surroundings.<br><br>
+          <strong>Attribute:</strong> Change the dark background to an indoor setting near a window with blinds and natural light.<br><br>
+          <strong>Audio:</strong> Replace the sound of a man speaking and a bird whistling with a bird chirping, a person burping, and the bird imitating the burp.
+        </fieldset>
+      </div>
+
+      <!-- Target Videos -->
+      <div class="target-videos">
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls class="target">
+            <source src="./static/videos/1/NBR-XVmJNjQ_60.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Target:</strong> NBR-XVmJNjQ_60</div>
+        </div>
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls>
+            <source src="./static/videos/1/eeNw3_nsEdM_310.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Hard Negative:</strong> eeNw3_nsEdM_310</div>
+        </div>
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls>
+            <source src="./static/videos/1/QM6X_mK_KAE_50.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Hard Negative:</strong> QM6X_mK_KAE_50</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Group 2 ===== -->
+    <div class="query-block">
+      <div class="query-video">
+        <video autoplay muted loop playsinline controls>
+          <source src="./static/videos/2/00_query_7JCV2B6mbDo_30.mp4" type="video/mp4">
+        </video>
+        <div class="query-caption"><strong>Query:</strong> 7JCV2B6mbDo_30</div>
+      </div>
+
+      <div class="modification-text">
+        <fieldset>
+          <legend>Modification Text</legend>
+          <strong>Object:</strong> Replace the child in a pink shirt, teddy bear, and chair with a baby in a white outfit with red patterns.<br><br>
+          <strong>Action:</strong> Change the action from the child walking with support from a chair to a baby walking to an adult, touching their leg, and being picked up.<br><br>
+          <strong>Attribute:</strong> Update the setting to an indoor home environment with a wooden cabinet and refrigerator, and change the clothing to a light patterned outfit for the baby and a dark shirt with beige pants for the adult.<br><br>
+          <strong>Audio:</strong> Change the audio from a baby's loud cries to a baby crying while a kid sings and laughs.
+        </fieldset>
+      </div>
+
+      <div class="target-videos">
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls class="target">
+            <source src="./static/videos/2/VcZykKLnTnI_30.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Target:</strong> VcZykKLnTnI_30</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Group 3 ===== -->
+    <div class="query-block">
+      <!-- Query Video -->
+      <div class="query-video">
+        <video autoplay muted loop playsinline controls>
+          <source src="./static/videos/3/00_query_cew6UO_TiWI_60.mp4" type="video/mp4">
+        </video>
+        <div class="query-caption"><strong>Query:</strong> cew6UO_TiWI_60</div>
+      </div>
+
+      <!-- Modification Text -->
+      <div class="modification-text">
+        <fieldset>
+          <legend>Modification Text</legend>
+          <strong>Object:</strong> The one duck remains the same, but its color changes from white to brown and green.<br><br>
+          <strong>Action:</strong> The action remains unchanged.<br><br>
+          <strong>Attribute:</strong> A wooden fence is added to the background.<br><br>
+          <strong>Audio:</strong> Replace the sound of splashing with a woman speaking, while a duck quacks.
+        </fieldset>
+      </div>
+
+      <!-- Targets & Hard Negatives -->
+      <div class="target-videos">
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls class="target">
+            <source src="./static/videos/3/II7uLXgHSD8_30.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Target:</strong> II7uLXgHSD8_30</div>
+        </div>
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls>
+            <source src="./static/videos/3/q0uIdT4wzRk_20.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Hard Negative:</strong> q0uIdT4wzRk_20</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Group 4 ===== -->
+    <div class="query-block">
+      <!-- Query Video -->
+      <div class="query-video">
+        <video autoplay muted loop playsinline controls>
+          <source src="./static/videos/4/00_query_qkQ7ooIUNd0_60.mp4" type="video/mp4">
+        </video>
+        <div class="query-caption"><strong>Query:</strong> qkQ7ooIUNd0_60</div>
+      </div>
+
+      <!-- Modification Text -->
+      <div class="modification-text">
+        <fieldset>
+          <legend>Modification Text</legend>
+          <strong>Object:</strong> Remove the trees from the background, focusing only on the sheep and the grassy field.<br><br>
+          <strong>Action:</strong> Change the sheep's movement from walking in a line to running across the field in a scattered and playful manner.<br><br>
+          <strong>Attribute:</strong> Shift the mood from calm and serene to lively and energetic, and change the sheep's appearance from all white to a mix of white, brown, and speckled patterns.<br><br>
+          <strong>Audio:</strong> Replace the sound of a bell ringing with birds chirping and a man and woman speaking.
+        </fieldset>
+      </div>
+
+      <!-- Targets & Hard Negatives -->
+      <div class="target-videos">
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls class="target">
+            <source src="./static/videos/4/YRg_topnqRI_40.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Target:</strong> YRg_topnqRI_40</div>
+        </div>
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls>
+            <source src="./static/videos/4/E4ECgoC8ahg_20.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Hard Negative:</strong> E4ECgoC8ahg_20</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Group 5 ===== -->
+    <div class="query-block">
+      <!-- Query Video -->
+      <div class="query-video">
+        <video autoplay muted loop playsinline controls>
+          <source src="./static/videos/5/00_query_2QsWqMg_j08_30.mp4" type="video/mp4">
+        </video>
+        <div class="query-caption"><strong>Query:</strong> 2QsWqMg_j08_30</div>
+      </div>
+
+      <!-- Modification Text -->
+      <div class="modification-text">
+        <fieldset>
+          <legend>Modification Text</legend>
+          <strong>Object:</strong> Change the man's attire from a striped shirt and headscarf to traditional attire, change the horse from white to brown, and add other people to the scene.<br><br>
+          <strong>Action:</strong> Change the action from the man leading the horse calmly down a sidewalk to the horse bending down while the man adjusts its position as others observe.<br><br>
+          <strong>Attribute:</strong> Transform the urban setting into a rural or semi-rural outdoor environment with a paved area.<br><br>
+          <strong>Audio:</strong> Replace the sound of a child speaking with people shouting.
+        </fieldset>
+      </div>
+
+      <!-- Targets & Hard Negatives -->
+      <div class="target-videos">
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls class="target">
+            <source src="./static/videos/5/6O6rqrMirkU_30.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Target:</strong> 6O6rqrMirkU_30</div>
+        </div>
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls>
+            <source src="./static/videos/5/DukP2K1j2Kg_30.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Hard Negative:</strong> DukP2K1j2Kg_30</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Group 6 ===== -->
+    <div class="query-block">
+      <!-- Query Video -->
+      <div class="query-video">
+        <video autoplay muted loop playsinline controls>
+          <source src="./static/videos/6/00_query_lxVT6iqlJ2k_27.mp4" type="video/mp4">
+        </video>
+        <div class="query-caption"><strong>Query:</strong> lxVT6iqlJ2k_27</div>
+      </div>
+
+      <!-- Modification Text -->
+      <div class="modification-text">
+        <fieldset>
+          <legend>Modification Text</legend>
+          <strong>Object:</strong> Replace the brown cushion and various items with a zebra-patterned blanket, a wooden floor.<br><br>
+          <strong>Action:</strong> Change the cat's action from standing on its hind legs to walking away.<br><br>
+          <strong>Attribute:</strong> Change the environment from a naturally lit, casual home setting to a cozy bedroom with warm, dim lighting.<br><br>
+          <strong>Audio:</strong> Remove the sound of lips kissing, leaving only a woman speaking and a cat meowing.
+        </fieldset>
+      </div>
+
+      <!-- Target -->
+      <div class="target-videos">
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls class="target">
+            <source src="./static/videos/6/Kx0eryXWMgE_7.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Target:</strong> Kx0eryXWMgE_7</div>
+        </div>
+        <div class="target-wrapper">
+          <video autoplay muted loop playsinline controls>
+            <source src="./static/videos/6/2JgHbC7yyTU_0.mp4" type="video/mp4">
+          </video>
+          <div class="target-caption"><strong>Hard Negative:</strong> 2JgHbC7yyTU_0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================== STATISTICS ================== -->
+    <h3 class="stats-title">STATISTICS</h3>
+
+    <!-- (1 + 2) Composition + Overall Aspect-wise -->
+    <div class="columns is-centered" style="margin-bottom: 2rem;">
+      <!-- (1) Dataset Composition Overview (Left) -->
+      <div class="column is-half">
+        <div class="figure">
+          <div class="fig-title">Dataset Composition Overview</div>
+          <figure>
+            <img class="img-max-600" src="./static/images/video_count/unique_videos_count.png" alt="Unique Video and Pair Count">
+          </figure>
+        </div>
+      </div>
+
+      <!-- (2) Overall Aspect-Wise Statistics (Right) -->
+      <div class="column is-half">
+        <div class="figure">
+          <div class="fig-title">Overall Aspect-Wise Statistics</div>
+          <figure>
+            <img class="img-max-600" src="./static/images/unique_word_length/ALL Videos statistics.png" alt="All Dataset Statistics">
+          </figure>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 2×2: Word Clouds (bigger) -->
+    <div class="columns is-multiline is-centered">
+      <div class="column is-half">
+        <div class="figure">
+          <div class="fig-title">Word Cloud of Object in Modification Text (Overall)</div>
+          <figure>
+            <img class="img-large" src="./static/images/wordcloud/wordcloud_object_all_videos.png" alt="Object WordCloud">
+          </figure>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="figure">
+          <div class="fig-title">Word Cloud of Action in Modification Text (Overall)</div>
+          <figure>
+            <img class="img-large" src="./static/images/wordcloud/wordcloud_action_all_videos.png" alt="Action WordCloud">
+          </figure>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="figure">
+          <div class="fig-title">Word Cloud of Attribute in Modification Text (Overall)</div>
+          <figure>
+            <img class="img-large" src="./static/images/wordcloud/wordcloud_attribute_all_videos.png" alt="Attribute WordCloud">
+          </figure>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="figure">
+          <div class="fig-title">Word Cloud of Audio in Modification Text (Overall)</div>
+          <figure>
+            <img class="img-large" src="./static/images/wordcloud/wordcloud_audio_modification_text_all_videos.png" alt="Audio WordCloud">
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- (5-1) Video-based Clustering -->
+    <div class="columns is-centered" style="margin-bottom: 2rem;">
+      <div class="column is-full">
+        <div class="figure">
+          <div class="fig-title">Video-based Clustering (Video Distribution per Cluster)</div>
+          <figure>
+            <img class="img-cluster" src="./static/images/clustering/video_clustering_distribution.png" alt="Video Clustering Distribution">
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- (5-2) Audio-based Clustering -->
+    <div class="columns is-centered" style="margin-bottom: 2rem;">
+      <div class="column is-full">
+        <div class="figure">
+          <div class="fig-title">Audio-based Clustering (Audio Distribution per Cluster)</div>
+          <figure>
+            <img class="img-cluster" src="./static/images/clustering/audio_clustering_distribution.png" alt="Audio Clustering Distribution">
+          </figure>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <!-- <div class="container has-text-centered"> -->
+    <!-- <p>This page is part of an anonymous submission.</p> -->
+  <!-- </div> -->
+</footer>
+
+</body>
+</html>
