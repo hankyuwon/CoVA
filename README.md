@@ -1,5 +1,5 @@
 # CoVA: Text-guided Composed Video Retrieval For Audio-Visual Content
-Impleement of paper: [CoVA: Text-guided Composed Video Retrieval For Audio-Visual Content](https://perceptualai-lab.github.io/CoVA/)
+Implement of paper: [CoVA: Text-guided Composed Video Retrieval For Audio-Visual Content](https://perceptualai-lab.github.io/CoVA/)
 
 ## 🔍 Project Page
 
